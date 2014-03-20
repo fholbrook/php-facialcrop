@@ -18,7 +18,8 @@
 //         karthik_tharavaad@yahoo.com
 // @Contributor Maurice Svay
 //              maurice@svay.Com
-
+//@Contributor Flint Holbrook
+//              f.holbrook@gmail.com
 namespace svay;
 
 class FaceDetector
@@ -296,5 +297,47 @@ class FaceDetector
             }
         }
         return true;
+    }
+    public function cropcoords($file) {
+        $canvas = imagecreatefromjpeg($file);
+        $this->faceDetect($canvas);
+        $json = json_decode($this->toJson(), true);
+        if (imagesx($canvas) > imagesy($canvas)) {
+            //find center point of face
+            $center['x'] = $json['x'] + ($json['w']/2);
+            $center['y'] = $json['y'] + ($json['w']/2);
+            if ((imagesy($canvas)/2) > $center['x']) {
+                    $rec['y'] =0;
+                    $rec['x'] =0;
+                    $rec['w'] = imagesy($canvas);
+            }elseif ((imagesy($canvas)/2) < $center['x']) {
+                    $rec['x'] = $center['x'] - (imagesy($canvas)/2);
+                    $rec['y'] = 0;
+                    $rec['w'] = imagesy($canvas);
+            }
+        } elseif (imagesx($canvas) < imagesy($canvas)) {
+            $detector = new svay\FaceDetector('detection.dat');
+            $detector->faceDetect($image);
+            $json = json_decode($detector->toJson(), true);
+            //find center point of face
+            $center['x'] = $json['x'] + ($json['w']/2);
+            $center['y'] = $json['y'] + ($json['w']/2);
+            if ((imagesx($canvas)/2) > $center['y']) {
+                    $rec['y'] =0;
+                    $rec['x'] =0;
+                    $rec['w'] = imagesx($canvas);
+            }elseif ((imagesx($canvas)/2) < $center['y']) {
+                    $rec['y'] = $center['y'] - (imagesx($canvas)/2);
+                    $rec['x'] = 0;
+                    $rec['w'] = imagesx($canvas);
+            }
+        } else {
+            $rec['y'] = 0;
+            $rec['x'] = 0;
+            $rec['w'] = imagesx($canvas);
+                    
+        }
+        return $rec;
+        
     }
 }
